@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Esther</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        #WebGL-output {
+            /*height: 100vh; 
+  			width: 100vw; */
+            display: block;
+        }
+
+    </style>
+</head>
+
+<body id="body">
+    <div id="WebGL-output"> <audio id="Sound" src="audio/AngelTheme.mp3" preload="auto" autoplay></audio></div>
+    <script type="text/javascript" src="../libs/three.min.js"></script>
+
+    <script type="text/javascript">
+        var pMaterial;
+        var nowTime;
+        var ellapsedTime = 0;
+        var musicBeginning = 3360;
+        var musicCorps = 10900;
+        var musicSlow = 37124;
+        var musicEnd = 41100;
+        startTime = new Date().getTime();
+
+       function slowParticlesVelocity() {
+            particlesVelocity = 0.01;
+        }
+
+        function accelerateParticlesVelocity() {
+            particlesVelocity += 0.09;
+        }
+
+        function stopParticlesVelocity() {
+            particlesVelocity = 0;
+        }
+
+        function particlesRotation() {
+            particleSystem.rotation.y += particlesVelocity;
+        }
+
+        function changeColorParticles() {
+            particleSystem.material.color.setHex(0x282C51);
+        }
+
+
+        function update() {
+             particleSystem.rotation.y += particlesVelocity;
+            nowTime = new Date().getTime();
+           /* particlesRotation();*/
+            camera.position.z = 300;
+            particleSystem.geometry.__dirtyVertices = true;
+            requestAnimationFrame(update);
+            ellapsedTime++;
+            if (nowTime > startTime + ellapsedTime + musicBeginning) {
+                slowParticlesVelocity();
+            }
+
+
+            if (nowTime > startTime + ellapsedTime + musicCorps) {
+               changeColorParticles();
+              accelerateParticlesVelocity();
+            }
+
+            if (nowTime > startTime + ellapsedTime + musicSlow) {
+              slowParticlesVelocity();
+                if (nowTime > startTime + ellapsedTime + musicEnd) {
+                    scene.remove(particleSystem);
+                }
+            }
+
+
+
+            renderer.render(scene, camera);
+            window.addEventListener('resize', onWindowResize, false);
+
+            function onWindowResize() {
+
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+
+                renderer.setSize(window.innerWidth, window.innerHeight);
+
+            }
+        }
+
+        var HEIGHT = window.innerHeight;
+        var WIDTH = window.innerWidth;
+
+        var VIEW_ANGLE = 45,
+            ASPECT = WIDTH / HEIGHT,
+            NEAR = 0.1,
+            FAR = 10000;
+        
+        var particleSystem;
+        var particlesVelocity = 0; //LAUNCH
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(new THREE.Color(0, 0));
+        renderer.setSize(WIDTH, HEIGHT);
+
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT,FAR, NEAR);
+       
+       
+        camera.position.z = 300;
+        camera.lookAt(scene.position);
+        scene.add(camera);
+
+        var loader = new THREE.TextureLoader();
+
+        // load a resource
+        loader.load(
+            // resource URL
+            'images/snowflake5.png',
+            // Function when resource is loaded
+
+
+            function(texture) {
+                // do something with the texture
+                console.log("loaded");
+                pMaterial = new THREE.PointsMaterial({
+                    color: 0xFFFF00,
+                    size: 20,
+                    map: texture,
+                    blending: THREE.AdditiveBlending,
+                      depthTest: false,
+                    transparent: true
+                });
+                particleCount = 1500,
+                    particles = new THREE.Geometry();
+                for (var p = 0; p < particleCount; p++) {
+                    var pX = Math.random() * 500 - 250,
+                        pY = Math.random() * 500 - 250,
+                        pZ = Math.random() * 500 - 250,
+                        particle = new THREE.Vector3(pX, pY, pZ);
+                         particle.velocity = new THREE.Vector3(0, -Math.random(), 0);
+                        particles.vertices.push(particle);
+                }
+
+
+                particleSystem = new THREE.Points(
+                    particles,
+                    pMaterial);
+                particleSystem.sortParticles = true;
+                scene.add(particleSystem);
+
+                var x = 0;
+var y = 0;
+var heartShape = new THREE.Shape();
+heartShape.moveTo( x + 25, y + 25 );
+heartShape.bezierCurveTo( x + 25, y + 25, x + 20, y, x, y );
+heartShape.bezierCurveTo( x - 30, y, x - 30, y + 35,x - 30,y + 35 );
+heartShape.bezierCurveTo( x - 30, y + 55, x - 10, y + 77, x + 25, y + 95 );
+heartShape.bezierCurveTo( x + 60, y + 77, x + 80, y + 55, x + 80, y + 35 );
+heartShape.bezierCurveTo( x + 80, y + 35, x + 80, y, x + 50, y );
+heartShape.bezierCurveTo( x + 35, y, x + 25, y + 25, x + 25, y + 25 );
+ scene.add(heartShape);
+
+                document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+
+
+                update();
+            },
+            // Function called when download progresses
+            function(xhr) {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            },
+            // Function called when download errors
+            function(xhr) {
+                console.log('An error happened');
+            }
+        );
+
+    </script>
+</body>
+
+</html>
